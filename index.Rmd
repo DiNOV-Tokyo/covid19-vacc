@@ -43,7 +43,7 @@ labels <- sprintf("<strong>%s</strong><br/>接種回数：%5.0f<br/>内1回目�
 
 jpn.shp %>% 
   leaflet() %>% 
-  setView(lat=37.5, lng=139, zoom=6) %>% 
+  setView(lat=37.5, lng=139, zoom=5) %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addPolygons(fillOpacity = 0.5,
               weight=1,
