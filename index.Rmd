@@ -1,0 +1,79 @@
+---
+title: "Covid19-vaccination in Japan"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+date: "`r Sys.Date()`"
+runitime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(leaflet)
+library(maps)
+library(mapproj)
+#library(rvest)
+library(DT)
+```
+
+Vaccination
+======================================================
+
+Column {data-width=60%}
+-----------------------------------------------------------------------
+
+
+```{r choropleths}
+
+
+jpn.shp <- readRDS("gadm36_JPN_1_sp.rds")
+
+vacc_dat <- read.csv("vacc.csv", fileEncoding = "UTF-8") %>% 
+  slice(2:48)
+
+pal <- colorNumeric("YlOrRd", domain=vacc_dat$vacc, reverse=F)
+
+labels <- sprintf("<strong>%s</strong><br/>接種回数：%5.0f<br/>内1回目：%5.0f<br/>内2回目：%5.0f",
+                  paste0(jpn.shp@data$NL_NAME_1),
+                  vacc_dat$vacc,
+                  vacc_dat$vacc1,
+                  vacc_dat$vacc2) %>% lapply(htmltools::HTML)
+
+jpn.shp %>% 
+  leaflet() %>% 
+  setView(lat=37.5, lng=139, zoom=6) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(fillOpacity = 0.5,
+              weight=1,
+              fillColor = ~pal(vacc_dat$vacc),
+              color = "orange",
+              label = labels,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "16px",
+                direction = "auto"),
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#888",
+                fillOpacity = 0.5,
+                bringToFront = TRUE)
+              ) %>% 
+  addLegend("bottomright", pal = pal, values = ~vacc_dat$vacc,
+            title = "新型コロナウイルス<br/>　ワクチン接種状況"  )
+
+
+```
+
+Column {data-width=40%}
+-----------------------------------------
+
+```{r vacctination_table}
+
+
+vacc_dat %>% 
+  datatable(rownames=FALSE, colnames=c("都道府県", "接種回数", "内1回目", "内2回目"),
+            filter='top', options=list(autoWidth=TRUE))
+
+```
