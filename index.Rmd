@@ -146,7 +146,7 @@ jpn.shp %>%
                 bringToFront = TRUE)
               ) %>% 
   addLegend("bottomright", pal = pal, values = ~jpn.shp@data$vacc,
-            title = "新型コロナウイルス<br/>ワクチン接種状況<br/>as of 21/05/2021"  )
+            title = "新型コロナウイルス<br/>ワクチン接種状況<br/>as of 23/05/2021"  )
 
 
 ```
