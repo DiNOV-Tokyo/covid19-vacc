@@ -15,6 +15,8 @@ library(mapproj)
 library(DT)
 ```
 
+## 医療従事者
+==============================================================
 
 Column {data-width=60%}
 -----------------------------------------------------------------------
@@ -77,6 +79,84 @@ Column {data-width=40%}
 ### Table
 
 ```{r vacctination_table}
+
+
+vacc_dat %>% 
+  datatable(rownames=FALSE, 
+            colnames=c("都道府県", "接種回数", "内1回目", "内2回目"),
+            filter='top', 
+            options=list(
+              autoWidth=TRUE,
+              pageLength=16
+            )
+          )
+
+```
+
+## 高齢者
+==============================================================
+
+Column {data-width=60%}
+-----------------------------------------------------------------------
+### Map
+
+```{r choropleths_old}
+
+
+jpn.shp <- readRDS("gadm36_JPN_1_sp.rds")
+
+vacc_dat <- read.csv("vacc_old.csv", fileEncoding = "UTF-8") %>% 
+  slice(2:48)
+
+va <- vacc_dat %>% mutate(NL_NAME_1=pref)
+sp_data <- jpn.shp@data %>% 
+  inner_join(va, by="NL_NAME_1") %>% 
+  select(pref, vacc, vacc1, vacc2)
+
+jpn.shp@data$pref <- sp_data$pref
+jpn.shp@data$vacc <- sp_data$vacc
+jpn.shp@data$vacc1 <- sp_data$vacc1
+jpn.shp@data$vacc2 <- sp_data$vacc2
+
+pal <- colorNumeric("YlOrRd", domain=jpn.shp@data$vacc, reverse=F)
+
+labels <- sprintf("<strong>%s</strong><br/>接種回数：%5.0f<br/>内1回目：%5.0f<br/>内2回目：%5.0f",
+                  paste0(jpn.shp@data$NL_NAME_1),
+                  jpn.shp@data$vacc,
+                  jpn.shp@data$vacc1,
+                  jpn.shp@data$vacc2) %>% lapply(htmltools::HTML)
+
+jpn.shp %>% 
+  leaflet() %>% 
+  setView(lat=37.5, lng=139, zoom=5) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(fillOpacity = 0.5,
+              weight=1,
+              fillColor = ~pal(jpn.shp@data$vacc),
+              color = "orange",
+              label = labels,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "16px",
+                direction = "auto"),
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#888",
+                fillOpacity = 0.5,
+                bringToFront = TRUE)
+              ) %>% 
+  addLegend("bottomright", pal = pal, values = ~jpn.shp@data$vacc,
+            title = "新型コロナウイルス<br/>ワクチン接種状況<br/>as of 21/05/2021"  )
+
+
+```
+
+Column {data-width=40%}
+-----------------------------------------
+
+### Table
+
+```{r vacctination_table_old}
 
 
 vacc_dat %>% 
