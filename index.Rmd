@@ -170,3 +170,80 @@ vacc_dat %>%
           )
 
 ```
+
+## 緊急搬送困難事案数
+==============================================================
+
+Column {data-width=60%}
+-----------------------------------------------------------------------
+### Map
+
+```{r choropleths_emgergency}
+
+
+jpn.shp <- readRDS("gadm36_JPN_1_sp.rds")
+
+emerge_dat <- read.csv("emgergency.csv", fileEncoding = "UTF-8", header = TRUE) 
+
+#emerge_dat <- read.csv("emgergency.csv", fileEncoding = "UTF-8", header = TRUE) %>% 
+#  slice(2:8)
+
+va <- emerge_dat %>% mutate(NL_NAME_1=pref)
+sp_data <- jpn.shp@data %>% 
+  inner_join(va, by="NL_NAME_1") %>% 
+  select(pref, emergency)
+
+jpn.shp@data$pref <- sp_data$pref
+jpn.shp@data$emergency <- sp_data$emergency
+#jpn.shp@data$vacc1 <- sp_data$vacc1
+
+pal <- colorNumeric("YlOrRd", domain=jpn.shp@data$emergency, reverse=F)
+
+labels <- sprintf("<strong>%s</strong><br/>事案数：%5.0f<br/>",
+                  paste0(jpn.shp@data$NL_NAME_1),
+                  jpn.shp@data$emergency) %>% lapply(htmltools::HTML)
+
+jpn.shp %>% 
+  leaflet() %>% 
+  setView(lat=37.5, lng=139, zoom=5) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addPolygons(fillOpacity = 0.5,
+              weight=1,
+              fillColor = ~pal(jpn.shp@data$emergency),
+              color = "orange",
+              label = labels,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "16px",
+                direction = "auto"),
+              highlight = highlightOptions(
+                weight = 5,
+                color = "#888",
+                fillOpacity = 0.5,
+                bringToFront = TRUE)
+              ) %>% 
+  addLegend("bottomright", pal = pal, values = ~jpn.shp@data$emergency,
+            title = "新型コロナウイルス<br/>緊急搬送困難事案数<br/>as of 30/07/2021"  )
+
+
+```
+
+Column {data-width=40%}
+-----------------------------------------
+
+### Table
+
+```{r vacctination_table_emerge}
+
+
+emerge_dat %>% 
+  datatable(rownames=FALSE, 
+            colnames=c("都道府県", "緊急搬送困難事案数"),
+            filter='top', 
+            options=list(
+              autoWidth=TRUE,
+              pageLength=16
+            )
+          )
+
+```
