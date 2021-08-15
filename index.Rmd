@@ -28,7 +28,7 @@ Column {data-width=60%}
 jpn.shp <- readRDS("gadm36_JPN_1_sp.rds")
 
 vacc_dat <- read.csv("vacc.csv", fileEncoding = "UTF-8") %>% 
-  slice(2:48)
+  slice(1:48)
 
 va <- vacc_dat %>% mutate(NL_NAME_1=pref)
 sp_data <- jpn.shp@data %>% 
@@ -93,7 +93,7 @@ vacc_dat %>%
 
 ```
 
-## 高齢者
+## 国民全体
 ==============================================================
 
 Column {data-width=60%}
@@ -105,8 +105,8 @@ Column {data-width=60%}
 
 jpn.shp <- readRDS("gadm36_JPN_1_sp.rds")
 
-vacc_dat <- read.csv("vacc_old.csv", fileEncoding = "UTF-8") %>% 
-  slice(2:48)
+vacc_dat <- read.csv("vacc_civic.csv", fileEncoding = "UTF-8") %>% 
+  slice(2:49)
 
 va <- vacc_dat %>% mutate(NL_NAME_1=pref)
 sp_data <- jpn.shp@data %>% 
@@ -146,7 +146,7 @@ jpn.shp %>%
                 bringToFront = TRUE)
               ) %>% 
   addLegend("bottomright", pal = pal, values = ~jpn.shp@data$vacc,
-            title = "新型コロナウイルス<br/>ワクチン接種状況<br/>as of 23/05/2021"  )
+            title = "新型コロナウイルス<br/>ワクチン接種状況<br/>as of 14/08/2021"  )
 
 
 ```
